@@ -78,7 +78,12 @@ export class UsersController {
     }
 
     const jwt = await this.jwtService.signAsync({ id: user.id });
-    response.cookie('jwt', jwt, { httpOnly: true });
+    response.cookie('jwt', jwt, { 
+      httpOnly: true, 
+      secure: true, // Chỉ gửi qua HTTPS
+      sameSite: 'none', // Để gửi cookie qua domain khác
+      maxAge: 24 * 60 * 60 * 1000 // 1 ngày
+  });
 
     return new BaseResponse(201, 'Login successfully', { token: jwt });
   }
