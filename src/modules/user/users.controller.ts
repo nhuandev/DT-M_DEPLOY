@@ -11,6 +11,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from './users.service';
@@ -18,6 +19,7 @@ import { Response, Request } from 'express';
 import { BaseResponse } from 'src/common/base-response';
 import { User } from '../../schema/user.schema';
 import { JwtService } from '@nestjs/jwt';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('api/user')
 export class UsersController {
@@ -166,6 +168,7 @@ export class UsersController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Req() request: Request) {
     const userId = (request.user as any).id; // Lấy userId từ token trong cookie
@@ -182,6 +185,7 @@ export class UsersController {
     });
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('me')
   async getUserInfo(@Req() request: Request) {
     const userId = (request.user as any).id; // Lấy ID từ token qua JwtAuthGuard
