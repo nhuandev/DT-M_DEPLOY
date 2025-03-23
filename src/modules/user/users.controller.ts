@@ -161,5 +161,42 @@ export class UsersController {
     }
   }
 
+  @Get('profile')
+  async getProfile(@Req() request: Request) {
+    const userId = (request.user as any).id; // Lấy userId từ token trong cookie
+    const user = await this.usersService.findOne({ _id: userId });
+    if (!user) {
+      throw new BadRequestException(new BaseResponse(400, 'User not found'));
+    }
+    return new BaseResponse(200, 'User profile', {
+      id: user.id,
+      role: user.role,
+      username: user.username,
+    });
+  }
 
+  @Get('me')
+  async getUserInfo(@Req() request: Request) {
+    const userId = (request.user as any).id; // Lấy ID từ token qua JwtAuthGuard
+    const user = await this.usersService.findOne({ _id: userId });
+
+    if (!user) {
+      throw new BadRequestException(new BaseResponse(400, 'User not found'));
+    }
+
+    // Loại bỏ các trường không mong muốn
+    const {
+      password,
+      avatar,
+      coursesPurchased,
+      materialsPurchased,
+      ...userInfo
+    } = user.toObject();
+
+    return new BaseResponse(
+      200,
+      'User information retrieved successfully',
+      userInfo,
+    );
+  }
 } 
