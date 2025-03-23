@@ -8,7 +8,7 @@ async function bootstrap() {
   app.use(cookieParser());
   // Cấu hình CORS
   app.enableCors({
-    origin: 'http://localhost:3000', // Cho phép domain frontend
+    origin: 'https://nuxtjs-4c2s6waop-phoprono1s-projects.vercel.app', 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
