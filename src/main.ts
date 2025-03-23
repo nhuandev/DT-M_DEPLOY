@@ -8,7 +8,7 @@ async function bootstrap() {
   app.use(cookieParser());
   // Cấu hình CORS
   app.enableCors({
-    origin: 'https://nuxtjs-4c2s6waop-phoprono1s-projects.vercel.app', 
+    origin: 'https://nuxtjs-alpha-sand.vercel.app', 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
