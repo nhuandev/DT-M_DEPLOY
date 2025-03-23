@@ -164,7 +164,9 @@ export class UsersController {
   @Get('profile')
   async getProfile(@Req() request: Request) {
     const userId = (request.user as any).id; // Lấy userId từ token trong cookie
+    console.log("id "+userId);
     const user = await this.usersService.findOne({ _id: userId });
+    console.log("id "+userId);
     if (!user) {
       throw new BadRequestException(new BaseResponse(400, 'User not found'));
     }
