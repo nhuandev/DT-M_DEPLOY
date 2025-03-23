@@ -17,11 +17,13 @@ import { UsersService } from './users.service';
 import { Response, Request } from 'express';
 import { BaseResponse } from 'src/common/base-response';
 import { User } from '../../schema/user.schema';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('api/user')
 export class UsersController {
   constructor(
     private usersService: UsersService,
+    private jwtService: JwtService,
   ) { }
 
   @Post('create')
@@ -75,7 +77,10 @@ export class UsersController {
       );
     }
 
-    return new BaseResponse(201, 'Login successfully');
+    const jwt = await this.jwtService.signAsync({ id: user.id });
+    response.cookie('jwt', jwt, { httpOnly: true });
+
+    return new BaseResponse(201, 'Login successfully', { token: jwt });
   }
 
 
