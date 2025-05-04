@@ -16,9 +16,17 @@ import { BaseResponse } from 'src/common/base-response';
 import { UsersService } from '../user/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import * as fs from 'fs';
-import * as path from 'path';
 import { Response, Request } from 'express';
 import { Public } from 'src/auth/public.decorator';
+
+import { createClient } from '@supabase/supabase-js';
+import * as path from 'path';
+import * as Buffer from 'buffer';
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // hoặc SUPABASE_ANON_KEY nếu bucket là public
+);
 
 @UseGuards(JwtAuthGuard)
 @Controller('api/blog')
@@ -34,31 +42,32 @@ export class BlogController {
       throw new BadRequestException(new BaseResponse(400, 'Data not empty'));
     }
 
-    // Tạo file HTML trước
-    const fileName = `${new Date().getTime()}-${blogData.title.replace(/\s+/g, '-')}.html`; // Tạo tên file tạm thời
-    const filePath = path.join(__dirname, '..', 'public', 'blogs', fileName);
+    const fileName = `${Date.now()}-${blogData.title.replace(/\s+/g, '-')}.html`;
 
-    // Tạo thư mục nếu chưa tồn tại
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    const { error: uploadError } = await supabase.storage
+      .from('blogs')
+      .upload(fileName, Buffer.Buffer.from(blogData.content), {
+        contentType: 'text/html',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      throw new BadRequestException(new BaseResponse(500, `Upload failed: ${uploadError.message}`));
     }
 
-    fs.writeFileSync(filePath, blogData.content);
+    const { data } = supabase.storage.from('blogs').getPublicUrl(fileName);
+    const publicUrl = data.publicUrl;
 
-    // Chuẩn bị dữ liệu blog với contentPath
     const blogPayload = {
       title: blogData.title,
-      contentPath: `https://djogddptbbsyfucwphga.supabase.co/storage/v1/object/public//blogs/${fileName}`, // Gán contentPath ngay từ đầu
+      contentPath: publicUrl,
       authorId: blogData.authorId,
       category: blogData.category,
       tags: blogData.tags || ['#blogstudy'],
       status: 'published',
     };
 
-    // Gọi service để tạo blog
     const newBlog = await this.blogService.create(blogPayload);
-
     return new BaseResponse(201, 'Blog created successfully', newBlog);
   }
 
