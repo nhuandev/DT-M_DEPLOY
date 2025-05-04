@@ -11,11 +11,10 @@ import { join } from 'path';
   // Kết nối với mongodb
   imports: [
     // MongooseModule.forRoot(process.env.MONGODB?? ""),
-    MongooseModule.forRoot('mongodb://localhost:27017/blogstudy'),
+    MongooseModule.forRoot('mongodb://mongo:MFeEwsUXVxBxumFhjBfCQhaYgEAUxYFY@turntable.proxy.rlwy.net:55388'),
     ConfigModule.forRoot({
       isGlobal: true, // Biến môi trường dùng được toàn cục
     }),
-
     UsersModule,
     BlogModule,
     CommentModule,
