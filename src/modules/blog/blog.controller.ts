@@ -49,7 +49,7 @@ export class BlogController {
     // Chuẩn bị dữ liệu blog với contentPath
     const blogPayload = {
       title: blogData.title,
-      contentPath: `/blogs/${fileName}`, // Gán contentPath ngay từ đầu
+      contentPath: `https://djogddptbbsyfucwphga.supabase.co/storage/v1/object/public//blogs/${fileName}`, // Gán contentPath ngay từ đầu
       authorId: blogData.authorId,
       category: blogData.category,
       tags: blogData.tags || ['#blogstudy'],
