@@ -10,7 +10,7 @@ import { Comment, CommentSchema } from 'src/schema/comment.schema';
 import { UsersModule } from '../user/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SupabaseModule } from '../supabase/supabase.module';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from '../supabase/superbase.service';
 
 @Module({
   imports: [
