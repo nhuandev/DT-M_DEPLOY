@@ -6,6 +6,7 @@ import { BlogModule } from './modules/blog/blog.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { SupabaseService } from './modules/supabase/supabase.service';
 
 @Module({
   // Kết nối với mongodb
@@ -14,6 +15,7 @@ import { join } from 'path';
     ConfigModule.forRoot({
       isGlobal: true, // Biến môi trường dùng được toàn cục
     }),
+    
     UsersModule,
     BlogModule,
     CommentModule,
@@ -23,6 +25,7 @@ import { join } from 'path';
     }),
   ],
   controllers: [],
-  providers: [],
+  providers: [SupabaseService],
+  exports: [SupabaseService]
 })
 export class AppModule {}

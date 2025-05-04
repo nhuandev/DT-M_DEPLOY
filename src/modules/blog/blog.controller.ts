@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -22,10 +23,10 @@ import { Public } from 'src/auth/public.decorator';
 import { createClient } from '@supabase/supabase-js';
 import * as path from 'path';
 import * as Buffer from 'buffer';
-
+import { SupabaseService } from '../supabase/supabase.service';
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_KEY! 
+  process.env.SUPABASE_KEY! // hoặc SUPABASE_ANON_KEY nếu bucket là public
 );
 
 @UseGuards(JwtAuthGuard)
@@ -33,8 +34,47 @@ const supabase = createClient(
 export class BlogController {
   constructor(
     private blogService: BlogService,
+    private readonly supabaseService: SupabaseService,
     private usersService: UsersService,
   ) { }
+
+  
+
+  // @Post('create')
+  // async createBlog(@Body() blogData: any) {
+  //   if (!blogData.title || !blogData.content || !blogData.category) {
+  //     throw new BadRequestException(new BaseResponse(400, 'Data not empty'));
+  //   }
+
+  //   // Tạo file HTML trước
+  //   const fileName = `${new Date().getTime()}-${blogData.title.replace(/\s+/g, '-')}.html`; // Tạo tên file tạm thời
+  //   const filePath = path.join(__dirname, '..', 'public', 'blogs', fileName);
+
+  //   // Tạo thư mục nếu chưa tồn tại
+  //   const dir = path.dirname(filePath);
+  //   if (!fs.existsSync(dir)) {
+  //     fs.mkdirSync(dir, { recursive: true });
+  //   }
+
+  //   fs.writeFileSync(filePath, blogData.content);
+
+  //   // Chuẩn bị dữ liệu blog với contentPath
+  //   const blogPayload = {
+  //     title: blogData.title,
+  //     contentPath: `/blogs/${fileName}`, // Gán contentPath ngay từ đầu
+  //     authorId: blogData.authorId,
+  //     category: blogData.category,
+  //     tags: blogData.tags || ['#blogstudy'],
+  //     status: 'published',
+  //   };
+
+  //   // Gọi service để tạo blog
+  //   const newBlog = await this.blogService.create(blogPayload);
+
+  //   return new BaseResponse(201, 'Blog created successfully', newBlog);
+  // }
+
+
 
   @Post('create')
   async createBlog(@Body() blogData: any) {
@@ -44,32 +84,41 @@ export class BlogController {
 
     const fileName = `${Date.now()}-${blogData.title.replace(/\s+/g, '-')}.html`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('blogs')
-      .upload(fileName, Buffer.Buffer.from(blogData.content), {
+    // Convert content to Buffer
+    const fileBuffer = Buffer.Buffer.from(blogData.content, 'utf-8');
+
+    const supabase = this.supabaseService.getClient();
+
+    const { error } = await supabase.storage
+      .from('blogs') // tên bucket
+      .upload(fileName, fileBuffer, {
         contentType: 'text/html',
         upsert: true,
       });
 
-    if (uploadError) {
-      throw new BadRequestException(new BaseResponse(500, `Upload failed: ${uploadError.message}`));
+    if (error) {
+      throw new InternalServerErrorException(
+        new BaseResponse(500, 'Failed to upload blog content to Supabase')
+      );
     }
 
-    const { data } = supabase.storage.from('blogs').getPublicUrl(fileName);
-    const publicUrl = data.publicUrl;
+    const { data } = supabase.storage
+      .from('blogs')
+      .getPublicUrl(fileName);
 
     const blogPayload = {
       title: blogData.title,
-      contentPath: publicUrl,
+      contentPath: data.publicUrl, // Link từ Supabase
       authorId: blogData.authorId,
       category: blogData.category,
       tags: blogData.tags || ['#blogstudy'],
       status: 'published',
     };
-    console.log("Data blog "+blogPayload);
+
     const newBlog = await this.blogService.create(blogPayload);
     return new BaseResponse(201, 'Blog created successfully', newBlog);
   }
+}
 
   @Post('like')
   async toggleLike(
