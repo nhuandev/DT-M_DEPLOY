@@ -9,8 +9,6 @@ import { User, UserSchema } from 'src/schema/user.schema';
 import { Comment, CommentSchema } from 'src/schema/comment.schema';
 import { UsersModule } from '../user/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SupabaseModule } from '../supabase/supabase.module';
-import { SupabaseService } from '../supabase/superbase.service';
 
 @Module({
   imports: [
@@ -38,9 +36,8 @@ import { SupabaseService } from '../supabase/superbase.service';
       inject: [ConfigService],
     }),
     UsersModule,
-    SupabaseModule
   ],
-  providers: [BlogService, SupabaseService],
+  providers: [BlogService],
   controllers: [BlogController],
   exports: [BlogService],
 })

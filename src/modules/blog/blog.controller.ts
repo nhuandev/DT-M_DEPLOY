@@ -3,7 +3,6 @@ import {
   Body,
   Controller,
   Get,
-  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -12,13 +11,16 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { BlogService } from './blog.service';
 import { BaseResponse } from 'src/common/base-response';
+// import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 import { UsersService } from '../user/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import * as fs from 'fs';
+import * as path from 'path';
+import { Response, Request } from 'express';
 import { Public } from 'src/auth/public.decorator';
-import * as Buffer from 'buffer';
-import { SupabaseService } from '../supabase/superbase.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('api/blog')
@@ -26,46 +28,8 @@ export class BlogController {
   constructor(
     private blogService: BlogService,
     private usersService: UsersService,
-    private superBaseService: SupabaseService,
+    private jwtService: JwtService,
   ) { }
-
-
-
-  // @Post('create')
-  // async createBlog(@Body() blogData: any) {
-  //   if (!blogData.title || !blogData.content || !blogData.category) {
-  //     throw new BadRequestException(new BaseResponse(400, 'Data not empty'));
-  //   }
-
-  //   // Tạo file HTML trước
-  //   const fileName = `${new Date().getTime()}-${blogData.title.replace(/\s+/g, '-')}.html`; // Tạo tên file tạm thời
-  //   const filePath = path.join(__dirname, '..', 'public', 'blogs', fileName);
-
-  //   // Tạo thư mục nếu chưa tồn tại
-  //   const dir = path.dirname(filePath);
-  //   if (!fs.existsSync(dir)) {
-  //     fs.mkdirSync(dir, { recursive: true });
-  //   }
-
-  //   fs.writeFileSync(filePath, blogData.content);
-
-  //   // Chuẩn bị dữ liệu blog với contentPath
-  //   const blogPayload = {
-  //     title: blogData.title,
-  //     contentPath: `/blogs/${fileName}`, // Gán contentPath ngay từ đầu
-  //     authorId: blogData.authorId,
-  //     category: blogData.category,
-  //     tags: blogData.tags || ['#blogstudy'],
-  //     status: 'published',
-  //   };
-
-  //   // Gọi service để tạo blog
-  //   const newBlog = await this.blogService.create(blogPayload);
-
-  //   return new BaseResponse(201, 'Blog created successfully', newBlog);
-  // }
-
-
 
   @Post('create')
   async createBlog(@Body() blogData: any) {
@@ -73,28 +37,33 @@ export class BlogController {
       throw new BadRequestException(new BaseResponse(400, 'Data not empty'));
     }
 
-    const fileName = `${Date.now()}-${blogData.title.replace(/\s+/g, '-')}.html`;
-    const fileBuffer = Buffer.Buffer.from(blogData.content, 'utf-8');
+    // Tạo file HTML trước
+    const fileName = `${new Date().getTime()}-${blogData.title.replace(/\s+/g, '-')}.html`; // Tạo tên file tạm thời
+    const filePath = path.join(__dirname, '..', 'public', 'blogs', fileName);
 
-    // Upload file lên Supabase
-    await this.superBaseService.uploadHtmlFile(fileName, fileBuffer);
+    // Tạo thư mục nếu chưa tồn tại
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
 
-    // Tạo blogPayload
+    fs.writeFileSync(filePath, blogData.content);
+
+    // Chuẩn bị dữ liệu blog với contentPath
     const blogPayload = {
       title: blogData.title,
-      contentPath: `https://djogddptbbsyfucwphga.supabase.co/storage/v1/object/public/blogs/${fileName}`,
+      contentPath: `/blogs/${fileName}`, // Gán contentPath ngay từ đầu
       authorId: blogData.authorId,
       category: blogData.category,
       tags: blogData.tags || ['#blogstudy'],
       status: 'published',
     };
 
-    // Lưu DB
+    // Gọi service để tạo blog
     const newBlog = await this.blogService.create(blogPayload);
+
     return new BaseResponse(201, 'Blog created successfully', newBlog);
-
   }
-
 
   @Post('like')
   async toggleLike(
@@ -241,5 +210,6 @@ export class BlogController {
     return new BaseResponse(201, 'Xóa bài viết thành công');
   }
 
+  
 }
 
