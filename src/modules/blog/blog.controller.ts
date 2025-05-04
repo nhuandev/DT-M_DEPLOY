@@ -118,7 +118,7 @@ export class BlogController {
     const newBlog = await this.blogService.create(blogPayload);
     return new BaseResponse(201, 'Blog created successfully', newBlog);
   }
-}
+
 
   @Post('like')
   async toggleLike(
