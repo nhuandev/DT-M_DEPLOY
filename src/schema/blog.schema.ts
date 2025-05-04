@@ -13,8 +13,8 @@ export class Blog extends Document {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   authorId: Types.ObjectId;
 
-  @Prop({ required: true })
-  category: number;
+  @Prop()
+  category: string;
 
   @Prop({ type: [String], default: ['#blogstudy'] })
   tags: string[];
