@@ -18,14 +18,13 @@ import { UsersService } from '../user/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Public } from 'src/auth/public.decorator';
 import * as Buffer from 'buffer';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from '../supabase/superbase.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('api/blog')
 export class BlogController {
   constructor(
     private blogService: BlogService,
-    private readonly supabaseService: SupabaseService,
     private usersService: UsersService,
     private superBaseService: SupabaseService,
   ) { }
