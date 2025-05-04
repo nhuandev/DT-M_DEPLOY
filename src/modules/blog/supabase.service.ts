@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class SupabaseService {
+  uploadHtmlFile(fileName: string, fileBuffer: any) {
+    throw new Error('Method not implemented.');
+  }
   private supabase;
 
   constructor() {

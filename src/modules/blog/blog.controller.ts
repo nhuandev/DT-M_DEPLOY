@@ -16,18 +16,9 @@ import { BlogService } from './blog.service';
 import { BaseResponse } from 'src/common/base-response';
 import { UsersService } from '../user/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import * as fs from 'fs';
-import { Response, Request } from 'express';
 import { Public } from 'src/auth/public.decorator';
-
-import { createClient } from '@supabase/supabase-js';
-import * as path from 'path';
 import * as Buffer from 'buffer';
-import { SupabaseService } from '../supabase/supabase.service';
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_KEY! // hoặc SUPABASE_ANON_KEY nếu bucket là public
-);
+import { SupabaseService } from './supabase.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('api/blog')
@@ -36,9 +27,10 @@ export class BlogController {
     private blogService: BlogService,
     private readonly supabaseService: SupabaseService,
     private usersService: UsersService,
+    private superBaseService: SupabaseService,
   ) { }
 
-  
+
 
   // @Post('create')
   // async createBlog(@Body() blogData: any) {
@@ -83,40 +75,25 @@ export class BlogController {
     }
 
     const fileName = `${Date.now()}-${blogData.title.replace(/\s+/g, '-')}.html`;
-
-    // Convert content to Buffer
     const fileBuffer = Buffer.Buffer.from(blogData.content, 'utf-8');
 
-    const supabase = this.supabaseService.getClient();
+    // Upload file lên Supabase
+    await this.superBaseService.uploadHtmlFile(fileName, fileBuffer);
 
-    const { error } = await supabase.storage
-      .from('blogs') // tên bucket
-      .upload(fileName, fileBuffer, {
-        contentType: 'text/html',
-        upsert: true,
-      });
-
-    if (error) {
-      throw new InternalServerErrorException(
-        new BaseResponse(500, 'Failed to upload blog content to Supabase')
-      );
-    }
-
-    const { data } = supabase.storage
-      .from('blogs')
-      .getPublicUrl(fileName);
-
+    // Tạo blogPayload
     const blogPayload = {
       title: blogData.title,
-      contentPath: data.publicUrl, // Link từ Supabase
+      contentPath: `https://djogddptbbsyfucwphga.supabase.co/storage/v1/object/public/blogs/${fileName}`,
       authorId: blogData.authorId,
       category: blogData.category,
       tags: blogData.tags || ['#blogstudy'],
       status: 'published',
     };
 
+    // Lưu DB
     const newBlog = await this.blogService.create(blogPayload);
     return new BaseResponse(201, 'Blog created successfully', newBlog);
+
   }
 
 
