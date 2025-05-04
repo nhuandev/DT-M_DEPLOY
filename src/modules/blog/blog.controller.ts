@@ -25,7 +25,7 @@ import * as Buffer from 'buffer';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_KEY! // hoặc SUPABASE_ANON_KEY nếu bucket là public
+  process.env.SUPABASE_KEY! 
 );
 
 @UseGuards(JwtAuthGuard)
@@ -66,7 +66,7 @@ export class BlogController {
       tags: blogData.tags || ['#blogstudy'],
       status: 'published',
     };
-
+    console.log("Data blog "+blogPayload);
     const newBlog = await this.blogService.create(blogPayload);
     return new BaseResponse(201, 'Blog created successfully', newBlog);
   }
