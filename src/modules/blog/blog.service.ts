@@ -1,14 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { NotificationGateway } from 'src/notification/notification.gateway';
 import { Blog } from 'src/schema/blog.schema';
-import { Notify } from 'src/schema/notify.schema';
 
 @Injectable()
 export class BlogService {
   constructor(@InjectModel(Blog.name) private blogModel: Model<Blog>,
-  private notificationGateway: NotificationGateway
 ) {}
 
   async create(blog: any): Promise<Blog> {
@@ -132,20 +129,4 @@ export class BlogService {
     }
   }
 
-
-  async reportBlog(reportData: Notify) {
-    const blog = await this.blogModel.findById(reportData.blogId);
-    if (!blog) {
-      throw new NotFoundException('Bài viết không tồn tại');
-    }
-  
-    // Chuyển bài viết sang trạng thái 'processing'
-    blog.status = 'processing';
-    await blog.save();
-  
-    // Gửi thông báo đến admin qua WebSocket
-    this.notificationGateway.sendReportNotification(reportData.blogId, reportData.status, reportData.category, reportData.reason);
-  
-  }
-  
 }
