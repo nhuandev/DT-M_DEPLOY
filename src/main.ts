@@ -6,6 +6,7 @@ declare const module: any;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
+  
   // Cấu hình CORS
   app.enableCors({
     origin: 'https://nuxtjs-alpha-sand.vercel.app', 
