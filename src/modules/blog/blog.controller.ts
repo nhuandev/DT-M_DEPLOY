@@ -25,7 +25,7 @@ import * as Buffer from 'buffer';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // hoặc SUPABASE_ANON_KEY nếu bucket là public
+  process.env.SUPABASE_KEY! // hoặc SUPABASE_ANON_KEY nếu bucket là public
 );
 
 @UseGuards(JwtAuthGuard)
