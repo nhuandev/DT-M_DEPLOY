@@ -52,7 +52,8 @@ export class BlogController {
     // Chuẩn bị dữ liệu blog với contentPath
     const blogPayload = {
       title: blogData.title,
-      contentPath: `/blogs/${fileName}`, // Gán contentPath ngay từ đầu
+      // contentPath: `/blogs/${fileName}`, // Gán contentPath ngay từ đầu
+      contentPath: blogData.content,
       authorId: blogData.authorId,
       category: blogData.category,
       tags: blogData.tags || ['#blogstudy'],
@@ -99,7 +100,7 @@ export class BlogController {
 
       const blogData = {
         title: blog.title,
-        contentPath: blog.contentPath,  // Thay contentHash thành contentPath
+        content: blog.content,  
         authorId: user.username,
         category: blog.category,
         tags: blog.tags,
@@ -209,6 +210,7 @@ export class BlogController {
     await this.blogService.delete(id);
     return new BaseResponse(201, 'Xóa bài viết thành công');
   }
+
 
   
 }

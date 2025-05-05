@@ -8,7 +8,7 @@ export class Blog extends Document {
   title: string;
 
   @Prop({ required: true })
-  contentPath: string;
+  content: string;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   authorId: Types.ObjectId;
