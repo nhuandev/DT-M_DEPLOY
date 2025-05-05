@@ -10,8 +10,7 @@ import { join } from 'path';
 @Module({
   // Kết nối với mongodb
   imports: [
-    // MongooseModule.forRoot(process.env.MONGODB?? ""),
-    MongooseModule.forRoot('mongodb://localhost:27017/blogstudy'),
+    MongooseModule.forRoot(process.env.MONGODB?? ""),
     ConfigModule.forRoot({
       isGlobal: true, // Biến môi trường dùng được toàn cục
     }),
