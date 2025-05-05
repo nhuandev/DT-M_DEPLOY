@@ -10,7 +10,7 @@ async function bootstrap() {
   // Cấu hình CORS
   app.enableCors({
     // origin: 'https://nuxtjs-alpha-sand.vercel.app', 
-    origin: true,
+    origin: true, // test
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
