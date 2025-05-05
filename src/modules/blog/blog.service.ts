@@ -13,6 +13,24 @@ export class BlogService {
     return newBlog.save();
   }
 
+  async update(blogId: string, updateData: Partial<Blog>): Promise<Blog> {
+    if (!Types.ObjectId.isValid(blogId)) {
+      throw new NotFoundException('Invalid Blog ID');
+    }
+  
+    const updatedBlog = await this.blogModel.findByIdAndUpdate(
+      blogId,
+      { $set: updateData },
+      { new: true }, // Trả về bản ghi sau khi cập nhật
+    );
+  
+    if (!updatedBlog) {
+      throw new NotFoundException('Blog not found');
+    }
+  
+    return updatedBlog;
+  }
+
   async findById(id: string) {
     try {
       if (!Types.ObjectId.isValid(id)) {

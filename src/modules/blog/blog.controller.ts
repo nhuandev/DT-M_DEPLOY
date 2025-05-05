@@ -6,6 +6,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Put,
   Query,
   Req,
   UnauthorizedException,
@@ -53,7 +54,7 @@ export class BlogController {
     const blogPayload = {
       title: blogData.title,
       // contentPath: `/blogs/${fileName}`, // Gán contentPath ngay từ đầu
-      contentPath: blogData.content,
+      content: blogData.content,
       authorId: blogData.authorId,
       category: blogData.category,
       tags: blogData.tags || ['#blogstudy'],
@@ -211,7 +212,10 @@ export class BlogController {
     return new BaseResponse(201, 'Xóa bài viết thành công');
   }
 
-
+  @Put(':id')
+    updateBlog(@Param('id') id: string, @Body() updateData: any) {
+    return this.blogService.update(id, updateData);
+  }
   
 }
 
