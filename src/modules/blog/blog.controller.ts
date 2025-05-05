@@ -8,19 +8,14 @@ import {
   Post,
   Put,
   Query,
-  Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { BlogService } from './blog.service';
 import { BaseResponse } from 'src/common/base-response';
-// import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 import { UsersService } from '../user/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import * as fs from 'fs';
-import * as path from 'path';
-import { Response, Request } from 'express';
 import { Public } from 'src/auth/public.decorator';
 
 @UseGuards(JwtAuthGuard)
@@ -38,22 +33,8 @@ export class BlogController {
       throw new BadRequestException(new BaseResponse(400, 'Data not empty'));
     }
 
-    // Tạo file HTML trước
-    const fileName = `${new Date().getTime()}-${blogData.title.replace(/\s+/g, '-')}.html`; // Tạo tên file tạm thời
-    const filePath = path.join(__dirname, '..', 'public', 'blogs', fileName);
-
-    // Tạo thư mục nếu chưa tồn tại
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    fs.writeFileSync(filePath, blogData.content);
-
-    // Chuẩn bị dữ liệu blog với contentPath
     const blogPayload = {
       title: blogData.title,
-      // contentPath: `/blogs/${fileName}`, // Gán contentPath ngay từ đầu
       content: blogData.content,
       authorId: blogData.authorId,
       category: blogData.category,
@@ -61,7 +42,6 @@ export class BlogController {
       status: 'published',
     };
 
-    // Gọi service để tạo blog
     const newBlog = await this.blogService.create(blogPayload);
 
     return new BaseResponse(201, 'Blog created successfully', newBlog);
@@ -212,7 +192,7 @@ export class BlogController {
     return new BaseResponse(201, 'Xóa bài viết thành công');
   }
 
-  @Put(':id')
+  @Put('update')
     updateBlog(@Param('id') id: string, @Body() updateData: any) {
     return this.blogService.update(id, updateData);
   }
