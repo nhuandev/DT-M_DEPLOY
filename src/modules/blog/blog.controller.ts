@@ -192,10 +192,10 @@ export class BlogController {
     return new BaseResponse(201, 'Xóa bài viết thành công');
   }
 
-  @Put(':id')
-  updateBlog(@Param('id') id: string, @Body() updateData: any) {
-    return this.blogService.update(id, updateData);
-  }
+@Put(':id')
+updateBlog(@Param('id') id: string, @Body() updateData: any) {
+  return this.blogService.update(id, updateData);
+}
   
 }
 
